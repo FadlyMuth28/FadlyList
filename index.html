@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FADLY LIST — Task & Progress Board</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #BFD4CC;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.25); border-radius: 999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.45); }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-5 lg:p-6 text-slate-800 flex items-stretch justify-center">
+
+  <!-- MAIN APP SHELL -->
+  <div class="w-full max-w-[1440px] bg-white rounded-2xl sm:rounded-[28px] shadow-2xl border border-white/70 flex flex-col md:flex-row overflow-hidden">
+
+    <!-- LEFT VERTICAL ICON RAIL -->
+    <aside class="w-full md:w-[68px] bg-white border-b md:border-b-0 md:border-r border-slate-100 px-4 py-3 md:py-6 flex md:flex-col items-center justify-between shrink-0">
+      <!-- Top Logo Badge -->
+      <div class="flex items-center gap-3 md:flex-col">
+        <div class="w-10 h-10 rounded-xl bg-[#0D766E] text-white flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Center Navigation Icons -->
+      <nav class="flex md:flex-col items-center gap-2 sm:gap-3">
+        <button onclick="switchTab('board')" id="rail-board" title="Kanban Board" class="nav-rail-btn w-10 h-10 rounded-xl flex items-center justify-center bg-[#FDE68A] text-slate-900 shadow-2xs transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="11" rx="1.5"/>
+          </svg>
+        </button>
+        <button onclick="switchTab('list')" id="rail-list" title="List & Tabel Lengkap" class="nav-rail-btn w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <button onclick="switchTab('weekly')" id="rail-weekly" title="Progress Done Weekly" class="nav-rail-btn w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </button>
+        <button onclick="switchTab('monthly')" id="rail-monthly" title="Tabel Utama (Obstacles & Solutions)" class="nav-rail-btn w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </button>
+      </nav>
+
+      <!-- Bottom Utility Icons -->
+      <div class="flex md:flex-col items-center gap-2">
+        <button onclick="openApiModal()" title="Pengaturan URL API Google Apps Script" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <button onclick="loadSheetData()" title="Refresh Data" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE AREA -->
+    <div class="flex-1 flex flex-col min-w-0 bg-white">
+
+      <!-- TOP BAR: GLOBAL SEARCH + PROFILE -->
+      <div class="px-5 sm:px-8 pt-5 pb-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100">
+        <div class="relative w-full sm:w-72">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            id="globalSearchInput"
+            oninput="syncSearchInputs(this.value)"
+            placeholder="Search a task..."
+            class="w-full bg-slate-50/90 border border-slate-200/80 rounded-xl pl-9 pr-12 py-2 text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:bg-white transition"
+          />
+          <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 px-1.5 py-0.5 rounded-md">⌘K</span>
+        </div>
+
+        <div class="flex items-center gap-3 ml-auto">
+          <button onclick="loadSheetData()" title="Sync Ulang Spreadsheet" class="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition relative">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span class="w-2 h-2 rounded-full bg-teal-500 absolute top-1.5 right-2"></span>
+          </button>
+
+          <div class="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full border border-slate-200/90 bg-slate-50/50">
+            <div class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">F</div>
+            <span class="text-xs font-semibold text-slate-700">Fadly</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING BAR -->
+      <div id="loadingBar" class="h-1 w-full bg-teal-50 overflow-hidden hidden">
+        <div class="h-full bg-teal-600 animate-pulse w-full"></div>
+      </div>
+
+      <!-- API URL WARNING BANNER -->
+      <div id="apiSetupBanner" class="hidden mx-5 sm:mx-8 mt-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="text-xs text-amber-900">
+          <b>Koneksi Spreadsheet Belum Diatur:</b> Tempelkan URL Web App Google Apps Script (<code class="bg-amber-100 px-1 rounded">/exec</code>) agar data bisa dimuat.
+        </div>
+        <button onclick="openApiModal()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition">
+          Atur URL API Sekarang
+        </button>
+      </div>
+
+      <!-- PROJECT HEADER & SHEET CONTROLS -->
+      <div class="px-5 sm:px-8 pt-5 pb-4">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">FADLY LIST</h1>
+            <div class="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-500">
+              <span>Database: <b class="text-slate-700">Google Sheets</b></span>
+              <span>•</span>
+              <span>Tanggal Sheet: <b id="reportDateDisplay" class="text-slate-700">-</b></span>
+              <span id="currentWeekBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-100 text-sky-700">
+                Week 1
+              </span>
+            </div>
+          </div>
+
+          <!-- RIGHT ACTION PILLS -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase">Tab:</span>
+              <select id="sheetSelector" onchange="onChangeSheet()" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
+                <option value="">Memuat...</option>
+              </select>
+            </div>
+
+            <button onclick="handleSyncWeeklyToMonthly()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+              <span>⇄</span> Sync Weekly
+            </button>
+
+            <button onclick="openApiModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+              <span>⚙</span> API
+            </button>
+
+            <button onclick="openNewMonthModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+              <span>+</span> Bulan Baru
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW SWITCHER TABS -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-5 pb-3 border-b border-slate-100">
+          <button onclick="switchTab('board')" id="tab-board" class="view-tab-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#FDE68A] text-slate-900 transition">
+            <span>◫</span> Board <span id="badgeTotalBoard" class="ml-1 px-1.5 py-0.2 rounded-full bg-white/80 text-[10px]">0</span>
+          </button>
+          <button onclick="switchTab('list')" id="tab-list" class="view-tab-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition">
+            <span>☰</span> List View
+          </button>
+          <button onclick="switchTab('weekly')" id="tab-weekly" class="view-tab-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition">
+            <span>✓</span> Progress Weekly <span id="badgeWeeklyTab" class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px]">0</span>
+          </button>
+          <button onclick="switchTab('monthly')" id="tab-monthly" class="view-tab-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition">
+            <span>▤</span> Tabel Utama <span id="badgeMonthlyTab" class="ml-1 px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px]">0</span>
+          </button>
+        </div>
+
+        <!-- FILTER, SORT & PRIMARY CTA TOOLBAR -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative">
+              <input
+                type="text"
+                id="toolbarSearchInput"
+                oninput="syncSearchInputs(this.value)"
+                placeholder="Search task"
+                class="w-40 sm:w-48 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+              />
+            </div>
+
+            <div class="flex items-center gap-1.5 border border-slate-200 rounded-xl px-3 py-2 bg-white text-xs">
+              <span class="text-slate-400">Sort by:</span>
+              <select id="sortSelect" onchange="renderCurrentView()" class="font-semibold text-slate-700 bg-transparent focus:outline-none cursor-pointer">
+                <option value="default">Default</option>
+                <option value="deadline">Deadline</option>
+                <option value="az">A - Z</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1.5 border border-slate-200 rounded-xl px-3 py-2 bg-white text-xs">
+              <span class="text-slate-400">Filter:</span>
+              <select id="weekFilter" onchange="renderCurrentView()" class="font-semibold text-slate-700 bg-transparent focus:outline-none cursor-pointer">
+                <option value="ALL">Semua Minggu</option>
+                <option value="Week 1">Week 1</option>
+                <option value="Week 2">Week 2</option>
+                <option value="Week 3">Week 3</option>
+                <option value="Week 4">Week 4</option>
+                <option value="Week 5">Week 5</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- WARM YELLOW PRIMARY CTA BUTTON -->
+          <div class="flex items-center gap-2">
+            <button onclick="openWeeklyModal(-1)" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+              + Input Weekly
+            </button>
+            <button onclick="openAddTodoModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-900 text-xs font-bold shadow-xs transition">
+              <span>+</span> Add New Task
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 1: KANBAN BOARD (4 PASTEL COLUMNS)                             -->
+      <!-- =================================================================== -->
+      <div id="view-board" class="px-5 sm:px-8 pb-8 flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+
+          <!-- COLUMN 1: TO DO (PASTEL PINK) -->
+          <div class="bg-[#FCE7F3]/80 rounded-2xl p-3.5 border border-pink-100 flex flex-col max-h-[680px]">
+            <div class="flex items-center justify-between px-1 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                <h2 class="text-xs font-bold text-slate-800 tracking-wide">To Do</h2>
+                <span id="colTodoCount" class="px-2 py-0.5 rounded-full bg-white/80 text-[11px] font-bold text-slate-600">0</span>
+              </div>
+              <button onclick="openAddTodoModal()" title="Tambah To-Do" class="w-6 h-6 rounded-lg hover:bg-white/70 text-slate-600 font-bold text-sm flex items-center justify-center transition">+</button>
+            </div>
+            <div id="kanbanTodoCards" class="space-y-3 overflow-y-auto custom-scroll pr-0.5 flex-1"></div>
+          </div>
+
+          <!-- COLUMN 2: PROGRESS DONE WEEKLY (PASTEL PEACH) -->
+          <div class="bg-[#FFEDD5]/85 rounded-2xl p-3.5 border border-orange-100 flex flex-col max-h-[680px]">
+            <div class="flex items-center justify-between px-1 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                <h2 class="text-xs font-bold text-slate-800 tracking-wide">Progress Weekly</h2>
+                <span id="colWeeklyCount" class="px-2 py-0.5 rounded-full bg-white/80 text-[11px] font-bold text-slate-600">0</span>
+              </div>
+              <button onclick="openWeeklyModal(-1)" title="Tambah Progress Weekly" class="w-6 h-6 rounded-lg hover:bg-white/70 text-slate-600 font-bold text-sm flex items-center justify-center transition">+</button>
+            </div>
+            <div id="kanbanWeeklyCards" class="space-y-3 overflow-y-auto custom-scroll pr-0.5 flex-1"></div>
+          </div>
+
+          <!-- COLUMN 3: NEED OBSTACLES & SOLUTIONS (PASTEL SKY BLUE) -->
+          <div class="bg-[#E0F2FE]/85 rounded-2xl p-3.5 border border-sky-100 flex flex-col max-h-[680px]">
+            <div class="flex items-center justify-between px-1 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                <h2 class="text-xs font-bold text-slate-800 tracking-wide">In Review (Obstacles)</h2>
+                <span id="colReviewCount" class="px-2 py-0.5 rounded-full bg-white/80 text-[11px] font-bold text-slate-600">0</span>
+              </div>
+              <button onclick="handleSyncWeeklyToMonthly()" title="Sinkronkan dari Weekly" class="w-6 h-6 rounded-lg hover:bg-white/70 text-slate-600 font-bold text-xs flex items-center justify-center transition">⇄</button>
+            </div>
+            <div id="kanbanReviewCards" class="space-y-3 overflow-y-auto custom-scroll pr-0.5 flex-1"></div>
+          </div>
+
+          <!-- COLUMN 4: COMPLETED TABEL UTAMA (PASTEL LAVENDER) -->
+          <div class="bg-[#EDE9FE]/85 rounded-2xl p-3.5 border border-indigo-100 flex flex-col max-h-[680px]">
+            <div class="flex items-center justify-between px-1 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <h2 class="text-xs font-bold text-slate-800 tracking-wide">Completed (Utama)</h2>
+                <span id="colDoneCount" class="px-2 py-0.5 rounded-full bg-white/80 text-[11px] font-bold text-slate-600">0</span>
+              </div>
+              <button onclick="openMonthlyModal(-1)" title="Tambah Manual Tabel Utama" class="w-6 h-6 rounded-lg hover:bg-white/70 text-slate-600 font-bold text-sm flex items-center justify-center transition">+</button>
+            </div>
+            <div id="kanbanCompletedCards" class="space-y-3 overflow-y-auto custom-scroll pr-0.5 flex-1"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 2: LIST & FULL TABLES VIEW                                     -->
+      <!-- =================================================================== -->
+      <div id="view-list" class="hidden px-5 sm:px-8 pb-8 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- TO-DO TABLE -->
+          <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 overflow-hidden">
+            <div class="px-4 py-3.5 bg-pink-50/60 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900">To-Do List Aktif</h3>
+              <button onclick="openAddTodoModal()" class="text-xs font-bold text-teal-700 hover:underline">+ Tambah</button>
+            </div>
+            <div id="listTodoContainer" class="divide-y divide-slate-100 max-h-[420px] overflow-y-auto custom-scroll"></div>
+          </div>
+
+          <!-- WEEKLY TABLE -->
+          <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 overflow-hidden">
+            <div class="px-4 py-3.5 bg-orange-50/60 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900">Progress Done Weekly</h3>
+              <button onclick="openWeeklyModal(-1)" class="text-xs font-bold text-teal-700 hover:underline">+ Input Weekly</button>
+            </div>
+            <div class="overflow-x-auto max-h-[420px] overflow-y-auto custom-scroll">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase">
+                  <tr>
+                    <th class="py-2.5 px-3 w-10 text-center">No</th>
+                    <th class="py-2.5 px-3">Progress Done</th>
+                    <th class="py-2.5 px-3 w-24">Week</th>
+                    <th class="py-2.5 px-3">Description</th>
+                    <th class="py-2.5 px-3 w-24 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="listWeeklyBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABEL UTAMA -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden">
+          <div class="px-4 py-3.5 bg-indigo-50/60 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">Tabel Utama: Progress Done, Obstacles & Solutions</h3>
+            <button onclick="openMonthlyModal(-1)" class="text-xs font-bold text-teal-700 hover:underline">+ Tambah Manual</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase">
+                <tr>
+                  <th class="py-2.5 px-4 w-10 text-center">No</th>
+                  <th class="py-2.5 px-4">Progress Done (Kolom C)</th>
+                  <th class="py-2.5 px-4">Obstacles (Kolom D)</th>
+                  <th class="py-2.5 px-4">Solutions (Kolom E)</th>
+                  <th class="py-2.5 px-4 w-36 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="listMonthlyBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT TO-DO LIST -->
+  <div id="todoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="todoModalTitle" class="text-base font-bold text-slate-900">Tambah Tugas Baru</h3>
+        <button type="button" onclick="closeTodoModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <form onsubmit="handleSaveTodo(event)" class="space-y-3.5">
+        <input type="hidden" id="todoEditIndex" value="-1" />
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Tugas</label>
+          <input type="text" id="todoTaskInput" required placeholder="Contoh: Review draft perjanjian..." class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Deadline (Auto-Sync Google Calendar)</label>
+          <input type="date" id="todoDeadlineInput" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-700" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeTodoModal()" class="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#FACC15] hover:bg-[#EAB308] text-slate-900">Simpan Tugas</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: INPUT / EDIT WEEKLY & TABEL UTAMA -->
+  <div id="weeklyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="weeklyModalTitle" class="text-base font-bold text-slate-900">Input Progress Weekly & Utama</h3>
+        <button onclick="closeWeeklyModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <form onsubmit="handleSaveWeekly(event)" class="space-y-3.5">
+        <input type="hidden" id="weeklyEditIndex" value="-1" />
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Progress Done (Kolom C)</label>
+          <input type="text" id="weeklyTaskInput" required class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Minggu</label>
+            <select id="weeklyWeekInput" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <option value="Week 1">Week 1</option>
+              <option value="Week 2">Week 2</option>
+              <option value="Week 3">Week 3</option>
+              <option value="Week 4">Week 4</option>
+              <option value="Week 5">Week 5</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Description Weekly</label>
+            <input type="text" id="weeklyDescInput" placeholder="Catatan singkat..." class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          </div>
+        </div>
+        <div class="pt-2 border-t border-slate-100 space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Obstacles / Kendala (Tabel Utama)</label>
+            <textarea id="weeklyObsInput" rows="2" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Solutions / Solusi (Tabel Utama)</label>
+            <textarea id="weeklySolInput" rows="2" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeWeeklyModal()" class="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#0D766E] text-white hover:bg-teal-800">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT OBSTACLES & SOLUTIONS TABEL UTAMA -->
+  <div id="monthlyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="monthlyModalTitle" class="text-base font-bold text-slate-900">Isi Obstacles & Solutions</h3>
+        <button onclick="closeMonthlyModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <form onsubmit="handleSaveMonthly(event)" class="space-y-3.5">
+        <input type="hidden" id="monthlyEditIndex" value="-1" />
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Progress Done (Kolom C)</label>
+          <input type="text" id="monthlyTaskInput" required class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Obstacles / Kendala (Kolom D)</label>
+          <textarea id="monthlyObsInput" rows="2" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Solutions / Tindak Lanjut (Kolom E)</label>
+          <textarea id="monthlySolInput" rows="2" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeMonthlyModal()" class="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#0D766E] text-white hover:bg-teal-800">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: BUAT SHEET BULAN BARU -->
+  <div id="newMonthModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Buat Sheet Bulan Baru</h3>
+        <button onclick="closeNewMonthModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <form onsubmit="handleCreateNewMonth(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Tab Sheet Baru</label>
+          <input type="text" id="newMonthNameInput" placeholder="Contoh: DEC atau JAN 2027" required class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 uppercase focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tanggal Laporan (Sel E4)</label>
+          <input type="date" id="newMonthDateInput" required class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        </div>
+        <label class="flex items-start gap-2.5 p-3 rounded-xl bg-teal-50/70 border border-teal-100 cursor-pointer">
+          <input type="checkbox" id="carryOverTodosInput" checked class="mt-0.5 w-4 h-4 rounded text-teal-600" />
+          <span class="text-xs text-slate-700">Bawa sisa <b>To-Do List</b> yang belum selesai ke sheet bulan baru.</span>
+        </label>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeNewMonthModal()" class="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#0D766E] text-white hover:bg-teal-800">Buat Sheet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PENGATURAN URL API APPS SCRIPT -->
+  <div id="apiModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Koneksi Google Apps Script API</h3>
+        <button onclick="closeApiModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Tempelkan URL Web App dari Google Apps Script (yang berakhiran <code class="bg-slate-100 px-1 rounded">/exec</code>).
+      </p>
+      <form onsubmit="handleSaveApiUrl(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Web App URL</label>
+          <input type="url" id="apiUrlInput" required placeholder="https://script.google.com/macros/s/.../exec" class="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeApiModal()" class="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#0D766E] text-white hover:bg-teal-800">Simpan & Hubungkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg"></div>
+
+  <script>
+    // =========================================================================
+    // URL WEB APP GOOGLE APPS SCRIPT SUDAH TERTANAM OTOMATIS:
+    // =========================================================================
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzwvGpwSV8R_vYXQAoeSVPhGThNtt-e9u-JPJM_NHbAPMdtygjO0SquL4XDn6nAsOmI8g/exec";
+
+    let CURRENT_VIEW = 'board';
+    let SEARCH_QUERY = '';
+    let STATE = {
+      sheets: [],
+      activeSheet: '',
+      reportDate: '-',
+      currentWeek: 'Week 1',
+      todos: [],
+      weekly: [],
+      monthly: []
+    };
+
+    function getApiUrl() {
+      const saved = localStorage.getItem('FADLY_LIST_API_URL');
+      if (saved && saved.startsWith('https://')) return saved;
+      if (DEFAULT_API_URL && DEFAULT_API_URL.startsWith('https://')) return DEFAULT_API_URL;
+      return '';
+    }
+
+    async function callApi(action, payload = {}) {
+      const url = getApiUrl();
+      if (!url) {
+        document.getElementById('apiSetupBanner').classList.remove('hidden');
+        throw new Error('URL API Google Apps Script belum diatur.');
+      }
+      document.getElementById('apiSetupBanner').classList.add('hidden');
+      setLoading(true);
+
+      try {
+        let res;
+        if (action === 'getAppData') {
+          const targetUrl = `${url}?action=getAppData&sheet=${encodeURIComponent(payload.sheetName || '')}`;
+          res = await fetch(targetUrl, { method: 'GET', redirect: 'follow' });
+        } else {
+          res = await fetch(url, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action, ...payload })
+          });
+        }
+
+        const json = await res.json();
+        setLoading(false);
+        if (json.status === 'error') throw new Error(json.message);
+        return json.data;
+      } catch (err) {
+        setLoading(false);
+        throw err;
+      }
+    }
+
+    function setLoading(isLoading) {
+      document.getElementById('loadingBar').classList.toggle('hidden', !isLoading);
+    }
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `fixed bottom-5 right-5 z-50 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg transition ${
+        isError ? 'bg-rose-600' : 'bg-slate-900'
+      }`;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3200);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function getDeadlineMeta(dateStr) {
+      if (!dateStr) return { label: 'Normal', cls: 'bg-slate-100 text-slate-600', text: 'Tanpa deadline' };
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return { label: 'Scheduled', cls: 'bg-sky-50 text-sky-700', text: dateStr };
+
+      const formatted = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (d < today) return { label: 'High • Overdue', cls: 'bg-rose-50 text-rose-600', text: `Due: ${formatted}` };
+      if (d.getTime() === today.getTime()) return { label: 'Medium • Today', cls: 'bg-amber-50 text-amber-700', text: `Due: ${formatted}` };
+      return { label: 'Low • Scheduled', cls: 'bg-sky-50 text-sky-700', text: `Due: ${formatted}` };
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!getApiUrl()) {
+        document.getElementById('apiSetupBanner').classList.remove('hidden');
+        renderAll(STATE);
+      } else {
+        loadSheetData('');
+      }
+    });
+
+    function switchTab(tab) {
+      CURRENT_VIEW = tab;
+      document.querySelectorAll('.view-tab-btn').forEach(btn => {
+        btn.className = 'view-tab-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition';
+      });
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if (activeBtn) {
+        activeBtn.className = 'view-tab-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#FDE68A] text-slate-900 transition';
+      }
+
+      document.querySelectorAll('.nav-rail-btn').forEach(btn => {
+        btn.className = 'nav-rail-btn w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition';
+      });
+      const activeRail = document.getElementById(`rail-${tab}`);
+      if (activeRail) {
+        activeRail.className = 'nav-rail-btn w-10 h-10 rounded-xl flex items-center justify-center bg-[#FDE68A] text-slate-900 shadow-2xs transition';
+      }
+
+      document.getElementById('view-board').classList.toggle('hidden', tab !== 'board');
+      document.getElementById('view-list').classList.toggle('hidden', tab === 'board');
+      renderCurrentView();
+    }
+
+    function syncSearchInputs(val) {
+      SEARCH_QUERY = val.toLowerCase().trim();
+      document.getElementById('globalSearchInput').value = val;
+      document.getElementById('toolbarSearchInput').value = val;
+      renderCurrentView();
+    }
+
+    function onChangeSheet() {
+      const selected = document.getElementById('sheetSelector').value;
+      loadSheetData(selected);
+    }
+
+    async function loadSheetData(sheetName) {
+      const target = sheetName !== undefined ? sheetName : STATE.activeSheet;
+      try {
+        const data = await callApi('getAppData', { sheetName: target });
+        renderAll(data);
+      } catch (err) {
+        showToast(err.message || 'Gagal memuat data.', true);
+      }
+    }
+
+    function renderAll(data) {
+      STATE = data;
+
+      const sel = document.getElementById('sheetSelector');
+      sel.innerHTML = (STATE.sheets.length ? STATE.sheets : ['NOV'])
+        .map(s => `<option value="${escapeHtml(s)}" ${s === STATE.activeSheet ? 'selected' : ''}>${escapeHtml(s)}</option>`)
+        .join('');
+
+      document.getElementById('reportDateDisplay').textContent = STATE.reportDate || '-';
+      document.getElementById('currentWeekBadge').textContent = `${STATE.currentWeek} • Active`;
+
+      document.getElementById('badgeTotalBoard').textContent = STATE.todos.length + STATE.weekly.length;
+      document.getElementById('badgeWeeklyTab').textContent = STATE.weekly.length;
+      document.getElementById('badgeMonthlyTab').textContent = STATE.monthly.length;
+
+      renderCurrentView();
+    }
+
+    function getFilteredData() {
+      const weekFilter = document.getElementById('weekFilter').value;
+      const sortMode = document.getElementById('sortSelect').value;
+
+      let todos = STATE.todos.filter(t => !SEARCH_QUERY || t.task.toLowerCase().includes(SEARCH_QUERY));
+      let weekly = STATE.weekly.filter(w => {
+        const matchWeek = weekFilter === 'ALL' || w.week === weekFilter;
+        const matchSearch = !SEARCH_QUERY || w.task.toLowerCase().includes(SEARCH_QUERY) || (w.description || '').toLowerCase().includes(SEARCH_QUERY);
+        return matchWeek && matchSearch;
+      });
+      let monthly = STATE.monthly.filter(m =>
+        !SEARCH_QUERY ||
+        m.task.toLowerCase().includes(SEARCH_QUERY) ||
+        (m.obstacles || '').toLowerCase().includes(SEARCH_QUERY) ||
+        (m.solutions || '').toLowerCase().includes(SEARCH_QUERY)
+      );
+
+      if (sortMode === 'az') {
+        todos = [...todos].sort((a, b) => a.task.localeCompare(b.task));
+        weekly = [...weekly].sort((a, b) => a.task.localeCompare(b.task));
+        monthly = [...monthly].sort((a, b) => a.task.localeCompare(b.task));
+      } else if (sortMode === 'deadline') {
+        todos = [...todos].sort((a, b) => (a.deadline || '9999-12-31').localeCompare(b.deadline || '9999-12-31'));
+      }
+
+      return { todos, weekly, monthly };
+    }
+
+    function renderCurrentView() {
+      const { todos, weekly, monthly } = getFilteredData();
+
+      const reviewItems = monthly.filter(m => !(m.obstacles && m.obstacles.trim() && m.solutions && m.solutions.trim()));
+      const completedItems = monthly.filter(m => Boolean(m.obstacles && m.obstacles.trim() && m.solutions && m.solutions.trim()));
+
+      document.getElementById('colTodoCount').textContent = todos.length;
+      document.getElementById('colWeeklyCount').textContent = weekly.length;
+      document.getElementById('colReviewCount').textContent = reviewItems.length;
+      document.getElementById('colDoneCount').textContent = completedItems.length;
+
+      // 1. RENDER KANBAN TO DO CARDS
+      const todoContainer = document.getElementById('kanbanTodoCards');
+      todoContainer.innerHTML = todos.length === 0
+        ? `<div class="bg-white/70 rounded-xl p-6 text-center text-xs text-slate-400">Tidak ada To-Do aktif. Klik <b>+ Add New Task</b>.</div>`
+        : todos.map(item => {
+            const meta = getDeadlineMeta(item.deadline);
+            return `
+            <div class="bg-white rounded-xl p-4 shadow-2xs border border-pink-100/90 space-y-3 hover:shadow-md transition">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold ${meta.cls}">${meta.label}</span>
+                <span class="text-[11px] font-bold text-slate-400">#${item.no}</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 leading-snug break-words">${escapeHtml(item.task)}</h3>
+                <p class="text-[11px] text-slate-400 mt-1">${escapeHtml(meta.text)}</p>
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px] font-semibold text-slate-400">
+                  <span>Progress</span><span>0%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-teal-600 rounded-full" style="width: 4%"></div>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <button onclick="handleCompleteTodo(${item.index})" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold transition">
+                  ✓ Selesai
+                </button>
+                <div class="flex items-center gap-1">
+                  <button onclick="openEditTodoModal(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-500 hover:text-indigo-600 rounded-lg">Edit</button>
+                  <button onclick="handleDeleteTodo(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-400 hover:text-rose-600 rounded-lg">Hapus</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('');
+
+      // 2. RENDER KANBAN WEEKLY CARDS
+      const weeklyContainer = document.getElementById('kanbanWeeklyCards');
+      weeklyContainer.innerHTML = weekly.length === 0
+        ? `<div class="bg-white/70 rounded-xl p-6 text-center text-xs text-slate-400">Belum ada Progress Weekly.</div>`
+        : weekly.map(item => `
+            <div class="bg-white rounded-xl p-4 shadow-2xs border border-orange-100/90 space-y-3 hover:shadow-md transition">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700">${escapeHtml(item.week || 'Week 1')}</span>
+                <span class="text-[11px] font-bold text-slate-400">#${item.no}</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 leading-snug break-words">${escapeHtml(item.task)}</h3>
+                <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${escapeHtml(item.description || 'Tersinkron ke Tabel Utama')}</p>
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px] font-semibold text-slate-400">
+                  <span>Progress</span><span>60%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-teal-600 rounded-full" style="width: 60%"></div>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">Auto-Synced</span>
+                <div class="flex items-center gap-1">
+                  <button onclick="openWeeklyModal(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-600 hover:text-indigo-600 rounded-lg">Edit</button>
+                  <button onclick="handleDeleteWeekly(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-400 hover:text-rose-600 rounded-lg">✕</button>
+                </div>
+              </div>
+            </div>`).join('');
+
+      // 3. RENDER KANBAN IN REVIEW (NEED OBSTACLES & SOLUTIONS)
+      const reviewContainer = document.getElementById('kanbanReviewCards');
+      reviewContainer.innerHTML = reviewItems.length === 0
+        ? `<div class="bg-white/70 rounded-xl p-6 text-center text-xs text-slate-400">Semua item Tabel Utama sudah lengkap!</div>`
+        : reviewItems.map(item => `
+            <div class="bg-white rounded-xl p-4 shadow-2xs border border-sky-100/90 space-y-3 hover:shadow-md transition">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700">Lengkapi Kendala/Solusi</span>
+                <span class="text-[11px] font-bold text-slate-400">#${item.no}</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 leading-snug break-words">${escapeHtml(item.task)}</h3>
+                <p class="text-[11px] text-slate-400 mt-1">
+                  ${item.obstacles ? `Obs: ${escapeHtml(item.obstacles)}` : 'Note: Obstacles & Solutions belum diisi.'}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px] font-semibold text-slate-400">
+                  <span>Progress</span><span>80%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-teal-600 rounded-full" style="width: 80%"></div>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <button onclick="openMonthlyModal(${item.index})" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[11px] font-bold transition">
+                  + Isi Obstacles/Sol.
+                </button>
+                <button onclick="handleDeleteMonthly(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-400 hover:text-rose-600 rounded-lg">✕</button>
+              </div>
+            </div>`).join('');
+
+      // 4. RENDER KANBAN COMPLETED (FULL TABEL UTAMA)
+      const completedContainer = document.getElementById('kanbanCompletedCards');
+      completedContainer.innerHTML = completedItems.length === 0
+        ? `<div class="bg-white/70 rounded-xl p-6 text-center text-xs text-slate-400">Belum ada item yang terisi lengkap Obstacles & Solutions.</div>`
+        : completedItems.map(item => `
+            <div class="bg-white rounded-xl p-4 shadow-2xs border border-indigo-100/90 space-y-3 hover:shadow-md transition">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700">Completed</span>
+                <span class="text-[11px] font-bold text-slate-400">#${item.no}</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 leading-snug break-words">${escapeHtml(item.task)}</h3>
+                <p class="text-[11px] text-amber-700 mt-1 line-clamp-1"><b>Obs:</b> ${escapeHtml(item.obstacles)}</p>
+                <p class="text-[11px] text-emerald-700 mt-0.5 line-clamp-1"><b>Sol:</b> ${escapeHtml(item.solutions)}</p>
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px] font-semibold text-slate-400">
+                  <span>Progress</span><span>100%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-teal-600 rounded-full w-full"></div>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">✓ Verified</span>
+                <div class="flex items-center gap-1">
+                  <button onclick="openMonthlyModal(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-600 hover:text-indigo-600 rounded-lg">Edit</button>
+                  <button onclick="handleDeleteMonthly(${item.index})" class="px-2 py-1 text-[11px] font-semibold text-slate-400 hover:text-rose-600 rounded-lg">✕</button>
+                </div>
+              </div>
+            </div>`).join('');
+
+      // 5. RENDER LIST VIEW TABLES
+      renderListTables(todos, weekly, monthly);
+    }
+
+    function renderListTables(todos, weekly, monthly) {
+      document.getElementById('listTodoContainer').innerHTML = todos.length === 0
+        ? `<div class="p-6 text-center text-xs text-slate-400">Semua tugas selesai!</div>`
+        : todos.map(item => `
+            <div class="p-3.5 flex items-center justify-between gap-2 hover:bg-slate-50">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <input type="checkbox" onchange="handleCompleteTodo(${item.index})" class="w-4 h-4 rounded text-teal-600 cursor-pointer" />
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-800 break-words">${escapeHtml(item.task)}</p>
+                  <p class="text-[10px] text-slate-400">${item.deadline || 'Tanpa deadline'}</p>
+                </div>
+              </div>
+              <div class="flex gap-1 shrink-0">
+                <button onclick="openEditTodoModal(${item.index})" class="px-2 py-1 text-[11px] text-indigo-600 hover:bg-indigo-50 rounded">Edit</button>
+                <button onclick="handleDeleteTodo(${item.index})" class="px-2 py-1 text-[11px] text-rose-600 hover:bg-rose-50 rounded">Hapus</button>
+              </div>
+            </div>`).join('');
+
+      document.getElementById('listWeeklyBody').innerHTML = weekly.length === 0
+        ? `<tr><td colspan="5" class="py-6 text-center text-slate-400">Belum ada data weekly.</td></tr>`
+        : weekly.map(item => `
+            <tr class="hover:bg-slate-50">
+              <td class="py-2.5 px-3 text-center font-semibold text-slate-500">${item.no}</td>
+              <td class="py-2.5 px-3 font-medium text-slate-800">${escapeHtml(item.task)}</td>
+              <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">${escapeHtml(item.week)}</span></td>
+              <td class="py-2.5 px-3 text-slate-500">${escapeHtml(item.description || '-')}</td>
+              <td class="py-2.5 px-3 text-right whitespace-nowrap">
+                <button onclick="openWeeklyModal(${item.index})" class="px-2 py-1 text-indigo-600 hover:bg-indigo-50 rounded">Edit</button>
+                <button onclick="handleDeleteWeekly(${item.index})" class="px-2 py-1 text-rose-600 hover:bg-rose-50 rounded">✕</button>
+              </td>
+            </tr>`).join('');
+
+      document.getElementById('listMonthlyBody').innerHTML = monthly.length === 0
+        ? `<tr><td colspan="5" class="py-6 text-center text-slate-400">Belum ada data Tabel Utama.</td></tr>`
+        : monthly.map(item => `
+            <tr class="hover:bg-slate-50">
+              <td class="py-2.5 px-4 text-center font-semibold text-slate-500">${item.no}</td>
+              <td class="py-2.5 px-4 font-medium text-slate-800">${escapeHtml(item.task)}</td>
+              <td class="py-2.5 px-4 text-amber-700">${escapeHtml(item.obstacles || '-')}</td>
+              <td class="py-2.5 px-4 text-emerald-700">${escapeHtml(item.solutions || '-')}</td>
+              <td class="py-2.5 px-4 text-right whitespace-nowrap">
+                <button onclick="openMonthlyModal(${item.index})" class="px-2.5 py-1 text-indigo-600 bg-indigo-50 rounded font-semibold">Edit</button>
+                <button onclick="handleDeleteMonthly(${item.index})" class="px-2 py-1 text-rose-600 hover:bg-rose-50 rounded">✕</button>
+              </td>
+            </tr>`).join('');
+    }
+
+    // =========================================================================
+    // HANDLER AKSI CRUD KE API
+    // =========================================================================
+    function openAddTodoModal() {
+      document.getElementById('todoModalTitle').textContent = 'Tambah Tugas Baru';
+      document.getElementById('todoEditIndex').value = -1;
+      document.getElementById('todoTaskInput').value = '';
+      document.getElementById('todoDeadlineInput').value = '';
+      document.getElementById('todoModal').classList.replace('hidden', 'flex');
+    }
+
+    function openEditTodoModal(index) {
+      const item = STATE.todos[index];
+      if (!item) return;
+      document.getElementById('todoModalTitle').textContent = `Edit Tugas #${item.no}`;
+      document.getElementById('todoEditIndex').value = index;
+      document.getElementById('todoTaskInput').value = item.task;
+      document.getElementById('todoDeadlineInput').value = item.deadline || '';
+      document.getElementById('todoModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeTodoModal() {
+      document.getElementById('todoModal').classList.replace('flex', 'hidden');
+    }
+
+    async function handleSaveTodo(e) {
+      e.preventDefault();
+      const idx = Number(document.getElementById('todoEditIndex').value);
+      const taskText = document.getElementById('todoTaskInput').value.trim();
+      const deadlineText = document.getElementById('todoDeadlineInput').value;
+      closeTodoModal();
+
+      try {
+        const data = idx === -1
+          ? await callApi('addTodoItem', { sheetName: STATE.activeSheet, taskText, deadlineText })
+          : await callApi('editTodoItem', { sheetName: STATE.activeSheet, itemIndex: idx, newText: taskText, newDeadline: deadlineText });
+        renderAll(data);
+        showToast(idx === -1 ? 'Tugas ditambahkan ke To-Do & Kalender!' : 'Tugas berhasil diperbarui');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function handleDeleteTodo(index) {
+      const item = STATE.todos[index];
+      if (!item || !confirm(`Hapus tugas "${item.task}"?`)) return;
+      try {
+        const data = await callApi('deleteTodoItem', { sheetName: STATE.activeSheet, itemIndex: index });
+        renderAll(data);
+        showToast('Tugas dihapus');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function handleCompleteTodo(index) {
+      const item = STATE.todos[index];
+      if (!item) return;
+      try {
+        const data = await callApi('completeTodoItem', {
+          sheetName: STATE.activeSheet,
+          itemIndex: index,
+          options: { week: STATE.currentWeek }
+        });
+        renderAll(data);
+        showToast(`"${item.task}" masuk ke Progress Weekly & Tabel Utama!`);
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function openWeeklyModal(index) {
+      document.getElementById('weeklyEditIndex').value = index;
+      if (index === -1) {
+        document.getElementById('weeklyModalTitle').textContent = 'Tambah Progress Weekly & Utama';
+        document.getElementById('weeklyTaskInput').value = '';
+        document.getElementById('weeklyWeekInput').value = STATE.currentWeek || 'Week 1';
+        document.getElementById('weeklyDescInput').value = '';
+        document.getElementById('weeklyObsInput').value = '';
+        document.getElementById('weeklySolInput').value = '';
+      } else {
+        const item = STATE.weekly[index];
+        const linked = STATE.monthly.find(m => m.task.toLowerCase() === item.task.toLowerCase());
+        document.getElementById('weeklyModalTitle').textContent = `Edit Progress #${item.no}`;
+        document.getElementById('weeklyTaskInput').value = item.task;
+        document.getElementById('weeklyWeekInput').value = item.week || STATE.currentWeek;
+        document.getElementById('weeklyDescInput').value = item.description || '';
+        document.getElementById('weeklyObsInput').value = linked ? linked.obstacles : '';
+        document.getElementById('weeklySolInput').value = linked ? linked.solutions : '';
+      }
+      document.getElementById('weeklyModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeWeeklyModal() {
+      document.getElementById('weeklyModal').classList.replace('flex', 'hidden');
+    }
+
+    async function handleSaveWeekly(e) {
+      e.preventDefault();
+      const idx = Number(document.getElementById('weeklyEditIndex').value);
+      const payload = {
+        task: document.getElementById('weeklyTaskInput').value,
+        week: document.getElementById('weeklyWeekInput').value,
+        description: document.getElementById('weeklyDescInput').value,
+        obstacles: document.getElementById('weeklyObsInput').value,
+        solutions: document.getElementById('weeklySolInput').value
+      };
+      closeWeeklyModal();
+      try {
+        const data = await callApi('saveWeeklyItem', { sheetName: STATE.activeSheet, itemIndex: idx, payload });
+        renderAll(data);
+        showToast('Tersimpan di Progress Weekly & Tabel Utama!');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function handleDeleteWeekly(index) {
+      const item = STATE.weekly[index];
+      if (!item || !confirm(`Hapus "${item.task}" dari Weekly & Tabel Utama?`)) return;
+      try {
+        const data = await callApi('deleteWeeklyItem', { sheetName: STATE.activeSheet, itemIndex: index, alsoDeleteMonthly: true });
+        renderAll(data);
+        showToast('Item dihapus');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function openMonthlyModal(index) {
+      document.getElementById('monthlyEditIndex').value = index;
+      if (index === -1) {
+        document.getElementById('monthlyModalTitle').textContent = 'Tambah Progress Done & Obstacles';
+        document.getElementById('monthlyTaskInput').value = '';
+        document.getElementById('monthlyObsInput').value = '';
+        document.getElementById('monthlySolInput').value = '';
+      } else {
+        const item = STATE.monthly[index];
+        document.getElementById('monthlyModalTitle').textContent = `Isi Obstacles & Solutions (#${item.no})`;
+        document.getElementById('monthlyTaskInput').value = item.task;
+        document.getElementById('monthlyObsInput').value = item.obstacles || '';
+        document.getElementById('monthlySolInput').value = item.solutions || '';
+      }
+      document.getElementById('monthlyModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeMonthlyModal() {
+      document.getElementById('monthlyModal').classList.replace('flex', 'hidden');
+    }
+
+    async function handleSaveMonthly(e) {
+      e.preventDefault();
+      const idx = Number(document.getElementById('monthlyEditIndex').value);
+      const payload = {
+        task: document.getElementById('monthlyTaskInput').value,
+        obstacles: document.getElementById('monthlyObsInput').value,
+        solutions: document.getElementById('monthlySolInput').value
+      };
+      closeMonthlyModal();
+      try {
+        const data = await callApi('saveMonthlyItem', { sheetName: STATE.activeSheet, itemIndex: idx, payload });
+        renderAll(data);
+        showToast('Obstacles & Solutions disimpan!');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function handleDeleteMonthly(index) {
+      const item = STATE.monthly[index];
+      if (!item || !confirm(`Hapus "${item.task}" dari Tabel Utama & Weekly?`)) return;
+      try {
+        const data = await callApi('deleteMonthlyItem', { sheetName: STATE.activeSheet, itemIndex: index, alsoDeleteWeekly: true });
+        renderAll(data);
+        showToast('Item berhasil dihapus');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function handleSyncWeeklyToMonthly() {
+      try {
+        const data = await callApi('syncAllWeeklyToMonthly', { sheetName: STATE.activeSheet });
+        renderAll(data);
+        showToast('Semua item Weekly berhasil disinkronkan!');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function openNewMonthModal() {
+      document.getElementById('newMonthNameInput').value = '';
+      document.getElementById('newMonthDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('carryOverTodosInput').checked = true;
+      document.getElementById('newMonthModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeNewMonthModal() {
+      document.getElementById('newMonthModal').classList.replace('flex', 'hidden');
+    }
+
+    async function handleCreateNewMonth(e) {
+      e.preventDefault();
+      const newSheetName = document.getElementById('newMonthNameInput').value.trim().toUpperCase();
+      const newDateStr = document.getElementById('newMonthDateInput').value;
+      const carryOverTodos = document.getElementById('carryOverTodosInput').checked;
+      closeNewMonthModal();
+      try {
+        const data = await callApi('createNewMonthSheet', {
+          sourceSheetName: STATE.activeSheet,
+          newSheetName,
+          newDateStr,
+          carryOverTodos
+        });
+        renderAll(data);
+        showToast(`Sheet "${newSheetName}" berhasil dibuat!`);
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function openApiModal() {
+      document.getElementById('apiUrlInput').value = getApiUrl();
+      document.getElementById('apiModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeApiModal() {
+      document.getElementById('apiModal').classList.replace('flex', 'hidden');
+    }
+
+    function handleSaveApiUrl(e) {
+      e.preventDefault();
+      const url = document.getElementById('apiUrlInput').value.trim();
+      localStorage.setItem('FADLY_LIST_API_URL', url);
+      closeApiModal();
+      loadSheetData('');
+      showToast('URL API disimpan & terhubung!');
+    }
+  </script>
+</body>
+</html>
